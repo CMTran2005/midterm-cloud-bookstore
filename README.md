@@ -21,17 +21,17 @@ Dự án kiểm tra giữa kì môn **Điện toán đám mây** đáp ứng 3 t
 Tạo file `.env` tại thư mục gốc với cấu trúc:
 
 ```env
-PORT=3000
-MONGODB_READ_URI=mongodb+srv://read23IT166:<PASSWORD>@vkucluster.lae8ukg.mongodb.net/DB_23IT166?appName=VkuCluster
-MONGODB_WRITE_URI=mongodb+srv://write23IT166:<PASSWORD>@vkucluster.lae8ukg.mongodb.net/DB_23IT166?appName=VkuCluster
-SESSION_SECRET=super_secret_session_key
-MSSV=23IT166
-HOTEN=Trần Châu Minh
+PORT=<PORT>
+MONGODB_READ_URI=mongodb+srv://<USERNAME>:<PASSWORD>@<cluster-url>.mongodb.net/<DB_NAME>?appName=<DB_NAME>
+MONGODB_WRITE_URI=mongodb+srv://<USERNAME>:<PASSWORD>@<cluster-url>.mongodb.net/<DB_NAME>?appName=<DB_NAME>
+SESSION_SECRET=<SESSION_SECRET>
+MSSV=<MÃ_SỐ_SV>
+HOTEN=<HỌ_VÀ_TÊN>
 ```
 
 > **Lưu ý:**
-> - Tài khoản `read23IT166` chỉ được cấp quyền `read` trên database `DB_23IT166`.
-> - Tài khoản `write23IT166` được cấp quyền `readWrite` trên database `DB_23IT166`.
+> - Tài khoản `read_<MÃ_SỐ_SV>` chỉ được cấp quyền `read` trên database `<DB_NAME>`.
+> - Tài khoản `write_<MÃ_SỐ_SV>` được cấp quyền `readWrite` trên database `<DB_NAME>`.
 > - Cần mở **Network Access** trên MongoDB Atlas cho IP `0.0.0.0/0` để cho phép kết nối từ máy tính và cloud hosting (Render).
 
 ---
@@ -47,6 +47,6 @@ HOTEN=Trần Châu Minh
    - Phiên làm việc (Session) không lưu trong RAM máy chủ mà được ghi tập trung xuống Cloud MongoDB Atlas (`sessions` collection) bằng `writeConnection`.
    - Giúp ứng dụng dễ dàng Scale Out (Auto-scaling đa máy chủ) mà không lo mất session của người dùng.
 3. **Thuật toán Cá nhân hóa:**
-   - Kiểm tra tiền tố mã sản phẩm: Bắt buộc bắt đầu bằng `166`. Nếu sai sẽ từ chối thêm và báo lỗi.
+   - Kiểm tra tiền tố mã sản phẩm: Bắt buộc bắt đầu bằng `<3 số cuối MSSV>`. Nếu sai sẽ từ chối thêm và báo lỗi.
    - Tính toán VAT động: Giá sau thuế = `Giá gốc * 1.1` (10% VAT). Giá sau thuế được lưu trữ trực tiếp vào CSDL và render ra giao diện Handlebars.
    - Footer trang web hiển thị đầy đủ: Họ tên, MSSV và mức VAT áp dụng.
