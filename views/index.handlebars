@@ -1,0 +1,166 @@
+<div class="container">
+  <!-- Stateless Cloud Session Banner -->
+  <div class="stateless-banner">
+    <div class="stateless-title">
+      <span>☁️</span>
+      <span>Kiến Trúc Stateless Session (Lưu trữ tập trung Cloud MongoDB Atlas)</span>
+    </div>
+    <div class="stateless-details">
+      <div class="stateless-item">
+        Session ID: <strong>{{sessionId}}</strong>
+      </div>
+      <div class="stateless-item">
+        Lượt truy cập phiên: <strong>{{sessionViews}}</strong>
+      </div>
+      <div class="stateless-item">
+        Thao tác ghi trong phiên: <strong>{{booksAddedInSession}}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông báo trạng thái -->
+  {{#if error}}
+    <div class="alert alert-error">
+      <span>⚠️</span>
+      <span>{{error}}</span>
+    </div>
+  {{/if}}
+
+  {{#if success}}
+    <div class="alert alert-success">
+      <span>✅</span>
+      <span>{{success}}</span>
+    </div>
+  {{/if}}
+
+  <!-- Grid chính: Form thêm sách & Danh sách sách -->
+  <div class="main-grid">
+    <!-- Cột trái: Form thêm sách (Gửi dữ liệu qua luồng GHI) -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>➕</span> Thêm Sách Mới
+        </h2>
+        <span class="badge-tag badge-write">Luồng Ghi (Write)</span>
+      </div>
+
+      <form action="/books/add" method="POST">
+        <div class="form-group">
+          <label class="form-label" for="bookCode">Mã sản phẩm *</label>
+          <input 
+            type="text" 
+            id="bookCode" 
+            name="bookCode" 
+            class="form-input" 
+            placeholder="Ví dụ: {{prefix}}-001" 
+            required
+            autocomplete="off"
+          >
+          <span class="form-hint">
+            ⚠️ Bắt buộc có tiền tố là 3 số cuối MSSV: <strong>{{prefix}}</strong>
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="title">Tên sách *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            class="form-input" 
+            placeholder="Nhập tên sách..." 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="author">Tác giả *</label>
+          <input 
+            type="text" 
+            id="author" 
+            name="author" 
+            class="form-input" 
+            placeholder="Nhập tên tác giả..." 
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="originalPrice">Giá gốc (VNĐ) *</label>
+          <input 
+            type="number" 
+            id="originalPrice" 
+            name="originalPrice" 
+            class="form-input" 
+            placeholder="Ví dụ: 150000" 
+            min="0"
+            step="1000"
+            required
+          >
+        </div>
+
+        <div class="vat-preview-box">
+          <div class="vat-row">
+            <span>Thuế suất VAT áp dụng:</span>
+            <span><strong>{{vatPercent}}%</strong></span>
+          </div>
+          <div class="vat-row highlight">
+            <span>Công thức tính:</span>
+            <span>Giá sau thuế = Giá gốc × (1 + {{vatPercent}}%)</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn">
+          <span>🚀</span> Thêm Sách Vào CSDL Cloud
+        </button>
+      </form>
+    </div>
+
+    <!-- Cột phải: Bảng danh sách sách (Truy vấn qua luồng ĐỌC) -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>📖</span> Danh Sách Sách Trên Cloud
+        </h2>
+        <span class="badge-tag badge-read">Luồng Đọc (Read)</span>
+      </div>
+
+      {{#if books.length}}
+        <div class="table-wrapper">
+          <table class="books-table">
+            <thead>
+              <tr>
+                <th>Mã Sách</th>
+                <th>Tên Sách</th>
+                <th>Tác Giả</th>
+                <th>Giá Gốc</th>
+                <th>VAT</th>
+                <th>Giá Sau Thuế</th>
+                <th>Thời Gian</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each books}}
+                <tr>
+                  <td><span class="code-badge">{{this.bookCode}}</span></td>
+                  <td><strong>{{this.title}}</strong></td>
+                  <td>{{this.author}}</td>
+                  <td>{{formatNumber this.originalPrice}} đ</td>
+                  <td><span style="color: #a5b4fc; font-weight: 600;">+{{this.vatPercent}}%</span></td>
+                  <td style="color: #34d399; font-weight: 700;">{{formatNumber this.finalPrice}} đ</td>
+                  <td style="font-size: 0.8rem; color: #94a3b8;">{{formatDate this.createdAt}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{else}}
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3>Chưa có sách nào trong CSDL Cloud</h3>
+          <p>Hãy dùng form bên trái để thêm sách đầu tiên có tiền tố <strong>{{prefix}}</strong>.</p>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</div>
