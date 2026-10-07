@@ -3,7 +3,8 @@ const express = require('express');
 const { engine } = require('express-handlebars');
 const path = require('path');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const connectMongo = require('connect-mongo');
+const MongoStore = connectMongo.MongoStore || connectMongo.default || connectMongo;
 const { BookRead, BookWrite } = require('./models/Book');
 
 const app = express();
