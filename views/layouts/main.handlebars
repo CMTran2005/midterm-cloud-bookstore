@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Sách Cloud - VKU</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Header ứng dụng -->
+  <header class="app-header">
+    <div class="container header-content">
+      <a href="/" class="brand-title">
+        <div class="brand-icon">📚</div>
+        <span>CloudBook Management</span>
+      </a>
+
+      <div class="cloud-status-badges">
+        <span class="status-badge connected">
+          <span class="dot green"></span> Read DB (User: read{{mssv}})
+        </span>
+        <span class="status-badge connected">
+          <span class="dot green"></span> Write DB (User: write{{mssv}})
+        </span>
+        <span class="status-badge session-cloud">
+          <span class="dot purple"></span> Database: DB_{{mssv}}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Thân trang chính -->
+  <main class="app-main">
+    {{{body}}}
+  </main>
+
+  <!-- Footer bắt buộc hiện Họ tên, MSSV và mức VAT áp dụng theo yêu cầu đề bài -->
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-info">
+        <span class="footer-item">Sinh viên: <strong>{{hoten}}</strong></span>
+        <span class="footer-item">MSSV: <strong>{{mssv}}</strong></span>
+        <span class="footer-item footer-vat-highlight">
+          Mức thuế VAT áp dụng: <strong>{{vatPercent}}%</strong> (Công thức: Chữ số cuối MSSV [{{lastDigit}}] + 4%)
+        </span>
+      </div>
+      <p style="margin-top: 8px; font-size: 0.8rem; color: #64748b;">
+        Hệ thống Điện toán Đám mây - Kiến trúc Stateless & Least Privilege Security
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
