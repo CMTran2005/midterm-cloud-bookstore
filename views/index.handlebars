@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" id="mainContainer">
   <!-- Stateless Cloud Session Banner -->
   <div class="stateless-banner">
     <div class="stateless-title">
@@ -20,20 +20,41 @@
   <!-- Thông báo trạng thái -->
   {{#if error}}
   <div class="alert alert-error">
+    <span>⚠️</span>
     <span>{{error}}</span>
   </div>
   {{/if}}
 
   {{#if success}}
   <div class="alert alert-success">
+    <span>✅</span>
     <span>{{success}}</span>
   </div>
   {{/if}}
 
-  <!-- Grid chính: Form thêm sách & Danh sách sách -->
+  <!-- Thanh chuyển đổi chế độ xem (Tabs Cửa Sổ) -->
+  <div class="view-switcher-bar">
+    <div class="tab-buttons">
+      <button type="button" class="tab-btn" id="tabBtnList" onclick="switchView('list')">
+        <span>📖 Danh Sách Sách (Luồng Đọc)</span>
+        <span class="tab-count-badge">{{books.length}}</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabBtnAdd" onclick="switchView('add')">
+        <span>➕ Thêm Sách Mới (Luồng Ghi)</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabBtnSplit" onclick="switchView('split')">
+        <span>⚡ Xem Song Song (2 Cửa Sổ)</span>
+      </button>
+    </div>
+    <div style="font-size: 0.82rem; color: #94a3b8;">
+      Đang kết nối: <span style="color: #34d399; font-weight: 600;">MongoDB Atlas</span>
+    </div>
+  </div>
+
+  <!-- Layout chính chứa 2 Cửa Sổ (Thêm sách & Danh sách) -->
   <div class="main-grid">
-    <!-- Cột trái: Form thêm sách (Gửi dữ liệu qua luồng GHI) -->
-    <div class="card">
+    <!-- CỬA SỔ 1: Form thêm sách (Gửi dữ liệu qua luồng GHI) -->
+    <div class="card" id="panelAddBook">
       <div class="card-header">
         <h2 class="card-title">
           Thêm Sách Mới
@@ -41,40 +62,74 @@
         <span class="badge-tag badge-write">Luồng Ghi (Write)</span>
       </div>
 
-      <form action="/books/add" method="POST">
+      <form action="/books/add" method="POST" id="addBookForm">
         <div class="form-group">
           <label class="form-label" for="bookCode">Mã sản phẩm *</label>
-          <input type="text" id="bookCode" name="bookCode" class="form-input" placeholder="Ví dụ: {{prefix}}-001"
-            required autocomplete="off">
+          <input 
+            type="text" 
+            id="bookCode" 
+            name="bookCode" 
+            class="form-input" 
+            placeholder="Ví dụ: {{prefix}}-001"
+            required 
+            autocomplete="off"
+          >
           <span class="form-hint">
-            Bắt buộc có tiền tố là 3 số cuối MSSV: <strong>{{prefix}}</strong>
+            Bắt buộc có tiền tố là 3 số cuối MSSV: <strong style="color: #38bdf8;">{{prefix}}</strong>
           </span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="title">Tên sách *</label>
-          <input type="text" id="title" name="title" class="form-input" placeholder="Nhập tên sách..." required>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            class="form-input" 
+            placeholder="Nhập tên sách..." 
+            required
+          >
         </div>
 
         <div class="form-group">
           <label class="form-label" for="author">Tác giả *</label>
-          <input type="text" id="author" name="author" class="form-input" placeholder="Nhập tên tác giả..." required>
+          <input 
+            type="text" 
+            id="author" 
+            name="author" 
+            class="form-input" 
+            placeholder="Nhập tên tác giả..." 
+            required
+          >
         </div>
 
         <div class="form-group">
           <label class="form-label" for="originalPrice">Giá gốc (VNĐ) *</label>
-          <input type="number" id="originalPrice" name="originalPrice" class="form-input" placeholder="Ví dụ: 150000"
-            min="0" step="1000" required>
+          <input 
+            type="number" 
+            id="originalPrice" 
+            name="originalPrice" 
+            class="form-input" 
+            placeholder="Ví dụ: 150000"
+            min="0" 
+            step="1000" 
+            required
+          >
         </div>
 
+        <!-- CẢI TIẾN B: Tự động tính thuế VAT Real-time khi nhập giá gốc -->
         <div class="vat-preview-box">
           <div class="vat-row">
             <span>Thuế suất VAT áp dụng:</span>
-            <span><strong>{{vatPercent}}%</strong></span>
+            <span><strong style="color: #a5b4fc;">{{vatPercent}}%</strong> (Chữ số cuối MSSV + 4%)</span>
+          </div>
+          <div class="vat-row">
+            <span>Tiền thuế VAT tính thêm (+{{vatPercent}}%):</span>
+            <span><strong id="previewVatAmount" style="color: #38bdf8;">0 đ</strong></span>
           </div>
           <div class="vat-row highlight">
-            <span>Công thức tính:</span>
-            <span>Giá sau thuế = Giá gốc × (1 + {{vatPercent}}%)</span>
+            <span>Tổng giá sau thuế (Lưu vào Cloud):</span>
+            <span><strong id="previewFinalPrice" style="color: #34d399; font-size: 1.05rem;">0 đ</strong></span>
           </div>
         </div>
 
@@ -84,8 +139,8 @@
       </form>
     </div>
 
-    <!-- Cột phải: Bảng danh sách sách (Truy vấn qua luồng ĐỌC) -->
-    <div class="card">
+    <!-- CỬA SỔ 2: Bảng danh sách sách (Truy vấn qua luồng ĐỌC) -->
+    <div class="card" id="panelBookList">
       <div class="card-header">
         <h2 class="card-title">
           Danh Sách Sách Trên Cloud
@@ -102,20 +157,20 @@
               <th>Tên Sách</th>
               <th>Tác Giả</th>
               <th>Giá Gốc</th>
-              <th>VAT</th>
+              <th>Mức VAT</th>
               <th>Giá Sau Thuế</th>
-              <th>Thời Gian</th>
+              <th>Thời Gian Tạo</th>
             </tr>
           </thead>
           <tbody>
             {{#each books}}
             <tr>
               <td><span class="code-badge">{{this.bookCode}}</span></td>
-              <td><strong>{{this.title}}</strong></td>
-              <td>{{this.author}}</td>
+              <td class="col-wrap"><strong>{{this.title}}</strong></td>
+              <td class="col-wrap" style="color: #cbd5e1;">{{this.author}}</td>
               <td>{{formatNumber this.originalPrice}} đ</td>
               <td><span style="color: #a5b4fc; font-weight: 600;">+{{this.vatPercent}}%</span></td>
-              <td style="color: #34d399; font-weight: 700;">{{formatNumber this.finalPrice}} đ</td>
+              <td><span style="color: #34d399; font-weight: 700;">{{formatNumber this.finalPrice}} đ</span></td>
               <td style="font-size: 0.8rem; color: #94a3b8;">{{formatDate this.createdAt}}</td>
             </tr>
             {{/each}}
@@ -126,9 +181,69 @@
       <div class="empty-state">
         <div class="empty-icon">📭</div>
         <h3>Chưa có sách nào trong CSDL Cloud</h3>
-        <p>Hãy dùng form bên trái để thêm sách đầu tiên có tiền tố <strong>{{prefix}}</strong>.</p>
+        <p>Bấm nút <strong>"Thêm Sách Mới"</strong> phía trên để tạo cuốn sách đầu tiên có tiền tố <strong>{{prefix}}</strong>.</p>
       </div>
       {{/if}}
     </div>
   </div>
 </div>
+
+<!-- Script xử lý Chuyển đổi Cửa sổ và Tính VAT Real-Time -->
+<script>
+  const vatRate = Number("{{vatPercent}}") || 10;
+  const originalPriceInput = document.getElementById('originalPrice');
+  const previewVatAmount = document.getElementById('previewVatAmount');
+  const previewFinalPrice = document.getElementById('previewFinalPrice');
+  const container = document.getElementById('mainContainer');
+
+  // 1. CẢI TIẾN B: Tính VAT Real-Time khi người dùng nhập giá gốc
+  function updateVatPreview() {
+    const rawVal = originalPriceInput ? originalPriceInput.value : 0;
+    const price = parseFloat(rawVal) || 0;
+    const vatAmount = Math.round(price * (vatRate / 100));
+    const finalPrice = price + vatAmount;
+
+    if (previewVatAmount) {
+      previewVatAmount.textContent = new Intl.NumberFormat('vi-VN').format(vatAmount) + ' đ';
+    }
+    if (previewFinalPrice) {
+      previewFinalPrice.textContent = new Intl.NumberFormat('vi-VN').format(finalPrice) + ' đ';
+    }
+  }
+
+  if (originalPriceInput) {
+    originalPriceInput.addEventListener('input', updateVatPreview);
+    updateVatPreview();
+  }
+
+  // 2. Chuyển đổi chế độ xem (Tabs / Cửa sổ)
+  function switchView(mode) {
+    container.classList.remove('view-mode-list', 'view-mode-add', 'view-mode-split');
+    container.classList.add('view-mode-' + mode);
+
+    document.getElementById('tabBtnList').classList.remove('active');
+    document.getElementById('tabBtnAdd').classList.remove('active');
+    document.getElementById('tabBtnSplit').classList.remove('active');
+
+    if (mode === 'list') {
+      document.getElementById('tabBtnList').classList.add('active');
+    } else if (mode === 'add') {
+      document.getElementById('tabBtnAdd').classList.add('active');
+    } else if (mode === 'split') {
+      document.getElementById('tabBtnSplit').classList.add('active');
+    }
+
+    localStorage.setItem('cloudBookstoreViewMode', mode);
+  }
+
+  // Khởi tạo chế độ ban đầu:
+  // Nếu có lỗi nhập form -> tự chuyển sang tab Thêm Sách ('add') để sửa lỗi
+  // Ngược lại dùng tab đã lưu trong localStorage (hoặc mặc định 'list')
+  const hasError = {{#if error}}true{{else}}false{{/if}};
+  if (hasError) {
+    switchView('add');
+  } else {
+    const savedMode = localStorage.getItem('cloudBookstoreViewMode') || 'list';
+    switchView(savedMode);
+  }
+</script>

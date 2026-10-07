@@ -15,11 +15,11 @@ const MSSV = process.env.MSSV || '23IT166';
 const HOTEN = process.env.HOTEN || 'Trần Châu Minh';
 
 // 1. Tiền tố mã sản phẩm: 3 số cuối MSSV
-const prefix = MSSV.slice(-3); // Ví dụ: 23IT166 -> '166'
+const prefix = MSSV.slice(-3);
 
 // 2. Thuế suất VAT: (Chữ số cuối MSSV + 4)%
-const lastDigit = parseInt(MSSV.slice(-1), 10); // Ví dụ: 23IT166 -> 6
-const vatPercent = lastDigit + 4; // 6 + 4 = 10%
+const lastDigit = parseInt(MSSV.slice(-1), 10);
+const vatPercent = lastDigit + 4;
 
 // Cấu hình View Engine Handlebars
 app.engine('handlebars', engine({
@@ -46,7 +46,7 @@ const sessionStore = MongoStore.create({
   mongoUrl: process.env.MONGODB_WRITE_URI || 'mongodb://localhost:27017/DB_' + MSSV,
   dbName: `DB_${MSSV}`,
   collectionName: 'sessions',
-  ttl: 24 * 60 * 60, // Hết hạn sau 1 ngày (24 giờ)
+  ttl: 24 * 60 * 60,
   autoRemove: 'native'
 });
 
